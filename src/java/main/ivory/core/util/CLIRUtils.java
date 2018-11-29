@@ -1434,33 +1434,59 @@ public class CLIRUtils extends Configured {
         System.out.println("Source vocab size: " + srcVocab.size());
         System.out.println("Target vocab size: " + trgVocab.size());
         int srcId = -1;
-        try {
-          srcId = srcVocab.get(srcWord);
-        } catch (Exception e) {
-          System.err.println(srcWord + " not found in source-side vocabulary " + srcVocabFile);
-          System.exit(-1);
-        }
-        if (trgWord.equals("ALL")) {
-          int[] trgs = src2trgProbs.get(srcId).getTranslations(0.0f);
-          System.out.println("(" + srcId + "," + srcWord + ") has "+ trgs.length + " translations:");
-          for (int i = 0; i < trgs.length; i++) {
-            trgWord = trgVocab.get(trgs[i]);
-            System.out.println("Prob("+trgWord+"|"+srcWord+")="+src2trgProbs.get(srcId, trgs[i]));
-          }
-        }else {
-          int trgId = -1;
-          try {
-            trgId = trgVocab.get(trgWord);
-          } catch (Exception e) {
-            System.err.println(trgWord + " not found in target-side vocabulary " + trgVocabFile);
-            System.exit(-1);  
-          }
-          System.out.println("Prob("+trgWord+"|"+srcWord+")="+src2trgProbs.get(srcId, trgId));
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-        System.exit(-1);
-      }
+		if (srcWord.equals("ALL")) {
+			  System.out.println("ALL Prob\t" + srcWord);
+			  int idx = 0;
+			  while(idx>=0) {
+				srcWord = srcVocab.get(idx);
+				try {
+					int [] trgs = src2trgProbs.get(idx).getTranslations(0.0f);
+					for (int i=0; i < trgs.length; i++) {
+						try {
+							trgWord = trgVocab.get(trgs[i]);
+							System.out.println(idx + ","+i+"\tProb\t"+srcWord+"\t"+trgWord+"\t"+src2trgProbs.get(idx, trgs[i]));
+						} catch (Exception e) {
+							break;
+						}
+
+					}
+				} catch (Exception e) {
+					idx ++;
+					continue;
+				}
+				idx ++;
+			  }
+		}
+		else 
+		{
+			try {
+			  srcId = srcVocab.get(srcWord);
+			} catch (Exception e) {
+			  System.err.println(srcWord + " not found in source-side vocabulary " + srcVocabFile);
+			  System.exit(-1);
+			}
+			if (trgWord.equals("ALL")) {
+			  int[] trgs = src2trgProbs.get(srcId).getTranslations(0.0f);
+			  System.out.println("(" + srcId + "," + srcWord + ") has "+ trgs.length + " translations:");
+			  for (int i = 0; i < trgs.length; i++) {
+				trgWord = trgVocab.get(trgs[i]);
+				System.out.println("Prob("+trgWord+"|"+srcWord+")="+src2trgProbs.get(srcId, trgs[i]));
+			  }
+			}else {
+			  int trgId = -1;
+			  try {
+				trgId = trgVocab.get(trgWord);
+			  } catch (Exception e) {
+				System.err.println(trgWord + " not found in target-side vocabulary " + trgVocabFile);
+				System.exit(-1);  
+			  }
+			  System.out.println("Prob("+trgWord+"|"+srcWord+")="+src2trgProbs.get(srcId, trgId));
+			}
+		}
+	  } catch (Exception e) {
+		e.printStackTrace();
+		System.exit(-1);
+	  }
     } else {
       System.err.println("Undefined option combination");
       printUsage();
